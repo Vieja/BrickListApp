@@ -2,6 +2,7 @@ package com.vieja.bricklist
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -21,11 +22,9 @@ class ProjectListAdapter (private val context: Context, private val projectsList
 
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         holder.bind(projectsList[position])
+
         holder.firstName.setOnClickListener { view ->
-            //Toast.makeText(context,"Testy",Toast.LENGTH_LONG).show()
             context.startActivity(Intent(context,SettingsActivity::class.java))
-            // categoryPhoto clicked.
-            // start your activity here
         }
     }
 

@@ -9,6 +9,8 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
 
@@ -26,6 +28,11 @@ class MainActivity : AppCompatActivity() {
 
         var collapsingToolbar = findViewById(R.id.collapsingToolbar) as CollapsingToolbarLayout
         collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.colorAccent));
+
+        addProjectButton.setOnClickListener { view ->
+            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                .setAction("Action", null).show()
+        }
 
         val recyclerView = findViewById(R.id.projectsList) as RecyclerView
         recyclerView.setHasFixedSize(true)
