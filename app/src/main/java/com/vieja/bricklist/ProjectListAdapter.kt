@@ -22,7 +22,8 @@ class ProjectListAdapter (private val context: Context, private val projectsList
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         holder.bind(projectsList[position])
         holder.firstName.setOnClickListener { view ->
-            Toast.makeText(context,"Testy",Toast.LENGTH_LONG).show()
+            //Toast.makeText(context,"Testy",Toast.LENGTH_LONG).show()
+            context.startActivity(Intent(context,SettingsActivity::class.java))
             // categoryPhoto clicked.
             // start your activity here
         }
@@ -34,16 +35,8 @@ class ProjectListAdapter (private val context: Context, private val projectsList
 
         fun bind(name: String) {
             firstName.text = name
-            itemView.setOnClickListener {
-               // if (adapterPosition != RecyclerView.NO_POSITION)
-            }
         }
 
-//        override fun onClick(v: View?) {
-//            //val i = Intent(context, SettingsActivity::class.java)
-//            //context.startActivity(i)
-//            Toast.makeText(context,"Testy",Toast.LENGTH_LONG).show()
-//        }
     }
 
 }
