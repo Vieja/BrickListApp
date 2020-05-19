@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
-            adapter = ProjectListAdapter(projectCardsList)
+            adapter = ProjectListAdapter(this@MainActivity, projectCardsList)
         }
     }
 
