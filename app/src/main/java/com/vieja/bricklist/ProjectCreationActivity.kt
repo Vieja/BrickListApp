@@ -1,7 +1,7 @@
 package com.vieja.bricklist
 
-import android.os.Build
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -20,5 +20,11 @@ class ProjectCreationActivity : AppCompatActivity() {
             it.setTint(ContextCompat.getColor(this, R.color.colorSecondary))
             toolbar.navigationIcon = it
         }
+
+        toolbar.setNavigationOnClickListener(object : View.OnClickListener {
+            override fun onClick(v: View?) {
+                onBackPressed()
+            }
+        })
     }
 }
