@@ -32,7 +32,8 @@ class MainActivity : AppCompatActivity() {
 
         projectCardsList = listOf(
             "test1",
-            "test2"
+            "test2",
+            "test3"
         )
 
         recyclerView.apply {
