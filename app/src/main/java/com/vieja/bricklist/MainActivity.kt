@@ -1,9 +1,7 @@
 package com.vieja.bricklist
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -11,7 +9,6 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -19,7 +16,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private var adapter: RecyclerView.Adapter<*>? = null
-    private var projectCardsList: List<String> = ArrayList<String>()
+    private var projectCardsList: List<Project> = ArrayList<Project>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,13 +38,15 @@ class MainActivity : AppCompatActivity() {
         val recyclerView = findViewById(R.id.projectsList) as RecyclerView
         recyclerView.setHasFixedSize(true)
 
+        val dbAccess: DBAccess? = DBAccess.getInstance(this)
+        dbAccess!!.open()
+        projectCardsList = dbAccess.getActiveProjects()
 
-
-        projectCardsList = listOf(
-            "test1",
-            "test2",
-            "test3"
-        )
+//        projectCardsList = listOf(
+//            "test1",
+//            "test2",
+//            "test3"
+//        )
 
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)

@@ -12,6 +12,7 @@ import java.io.StringReader
 import java.util.*
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
+import kotlin.collections.ArrayList
 
 
 class DBAccess private constructor(context: Context) {
@@ -114,6 +115,19 @@ class DBAccess private constructor(context: Context) {
             e.printStackTrace()
         }
         return null
+    }
+
+    fun getActiveProjects(): ArrayList<Project> {
+        val list = ArrayList<Project>()
+        val cursor = database!!.rawQuery("SELECT Name, id FROM Inventories WHERE Active = 1", null)
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val pr = Project(cursor.getString(0),cursor.getString(1).toInt())
+            list.add(pr)
+            cursor.moveToNext()
+        }
+        cursor.close()
+        return list
     }
 
     companion object {
