@@ -19,6 +19,7 @@
         </activity>
         <activity android:name=".SettingsActivity"/>
         <activity android:name=".ProjectCreationActivity"/>
+        <activity android:name=".ComponentsActivity"/>
     </application>
 
 </manifest>

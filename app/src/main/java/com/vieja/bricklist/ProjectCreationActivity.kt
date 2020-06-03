@@ -92,7 +92,6 @@ class ProjectCreationActivity : AppCompatActivity() {
                             .setAction("Action", null).show()
                     } else {
                         dbAccess.addComponents(projectID, result)
-                        Log.v("ehhh","sukcesik")
                         dbAccess.close()
                         val ac : Activity = context as Activity
                         ac.finish()

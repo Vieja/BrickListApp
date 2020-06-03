@@ -130,6 +130,12 @@ class DBAccess private constructor(context: Context) {
         return list
     }
 
+    fun getComponentsOfProject(): List<Component> {
+        val list = ArrayList<Component>()
+        list.add(Component(1,"Testowy","kolorek","0 of 3"))
+        return list
+    }
+
     companion object {
         private var instance: DBAccess? = null
 
