@@ -5,7 +5,13 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
+import org.w3c.dom.Document
+import org.w3c.dom.Element
+import org.xml.sax.InputSource
+import java.io.StringReader
 import java.util.*
+import javax.xml.parsers.DocumentBuilder
+import javax.xml.parsers.DocumentBuilderFactory
 
 
 class DBAccess private constructor(context: Context) {
@@ -57,8 +63,57 @@ class DBAccess private constructor(context: Context) {
         return newRowId
     }
 
-    fun addComponents(projectID: Long, result: String?) {
+    fun addComponents(projectID: Long, result: String) {
+        val doc = convertStringToXMLDocument(result)
+        val nodesList = doc!!.getElementsByTagName("ITEM")
+        for (i in 0 until nodesList.length) {
+            val node : Element = nodesList.item(i) as Element
 
+            val itemType = node.getElementsByTagName("ITEMTYPE").item(0).textContent
+            val typeID = findTypeID(itemType)
+
+            val colorCode = node.getElementsByTagName("COLOR").item(0).textContent
+            val colorID = findColorID(colorCode)
+
+            val cv = ContentValues()
+            cv.put("InventoryID", projectID)
+            cv.put("TypeID", typeID)
+            cv.put("ItemID", node.getElementsByTagName("ITEMID").item(0).textContent)
+            cv.put("ColorID", colorID)
+            cv.put("QuantityInSet", node.getElementsByTagName("QTY").item(0).textContent)
+            cv.put("Extra", node.getElementsByTagName("EXTRA").item(0).textContent)
+            database!!.insert("InventoriesParts",null,cv)
+        }
+    }
+
+    private fun findColorID(colorCode: String?): String {
+        var cur =  database!!.rawQuery("SELECT id FROM Colors WHERE Code = \""+colorCode+"\"",null)
+        cur.moveToFirst()
+        return cur.getString(0)
+    }
+
+    private fun findTypeID(itemType: String?): String {
+        var cur =  database!!.rawQuery("SELECT id FROM ItemTypes WHERE CODE = \""+itemType+"\"",null)
+        cur.moveToFirst()
+        return cur.getString(0)
+    }
+
+    private fun convertStringToXMLDocument(xmlString: String): Document? {
+        //Parser that produces DOM object trees from XML content
+        val factory: DocumentBuilderFactory = DocumentBuilderFactory.newInstance()
+
+        //API to obtain DOM Document instance
+        var builder: DocumentBuilder? = null
+        try {
+            //Create DocumentBuilder with default configuration
+            builder = factory.newDocumentBuilder()
+
+            //Parse the content to Document object
+            return builder.parse(InputSource(StringReader(xmlString)))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return null
     }
 
     companion object {

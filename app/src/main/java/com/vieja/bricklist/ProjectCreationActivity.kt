@@ -78,22 +78,25 @@ class ProjectCreationActivity : AppCompatActivity() {
             private val TAG = "DownloadData"
             override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
-                if (result == "") {
+                if (result == "" || result == null) {
                     Snackbar.make(view, "Cannot find set with given ID!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
                 }
                 else {//Log.wtf(TAG, "onPostExecute is $result")
                     val dbAccess: DBAccess? = DBAccess.getInstance(context)
                     dbAccess!!.open()
-                    var projectID = dbAccess.addProject(id, name)
+                    val projectID = dbAccess.addProject(id, name)
                     if (projectID == -1L) {
+                        dbAccess.close()
                         Snackbar.make(view, "This set already exists in your project list!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show()
                     } else {
                         dbAccess.addComponents(projectID, result)
+                        Log.v("ehhh","sukcesik")
+                        dbAccess.close()
+                        val ac : Activity = context as Activity
+                        ac.finish()
                     }
-
-                    dbAccess.close()
                 }
             }
 

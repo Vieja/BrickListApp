@@ -3,6 +3,7 @@ package com.vieja.bricklist
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -31,13 +32,16 @@ class MainActivity : AppCompatActivity() {
         collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.colorAccent));
 
         addProjectButton.setOnClickListener { view ->
-//            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                .setAction("Action", null).show()
             startActivity(Intent(this,ProjectCreationActivity::class.java))
         }
+    }
 
+    override fun onStart() {
+        super.onStart()
         val recyclerView = findViewById(R.id.projectsList) as RecyclerView
         recyclerView.setHasFixedSize(true)
+
+
 
         projectCardsList = listOf(
             "test1",
