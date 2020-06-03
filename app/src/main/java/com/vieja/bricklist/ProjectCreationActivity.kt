@@ -1,6 +1,7 @@
 package com.vieja.bricklist
 
 import android.app.Activity
+import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -17,8 +18,6 @@ import java.net.URL
 
 
 class ProjectCreationActivity : AppCompatActivity() {
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,23 +39,8 @@ class ProjectCreationActivity : AppCompatActivity() {
             }
         })
 
-        var context = this
         val view = constraintLayout
-
-        //przycisk CHECK
-        val checkButton: Button = findViewById(R.id.checkButton) as Button
-        checkButton.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(v: View?) {
-                val dbAccess: DBAccess? = DBAccess.getInstance(context)
-                dbAccess!!.open()
-                val quotes: List<String> = dbAccess.quotes
-                Log.v(
-                    "hi",
-                    quotes[0] + " " + quotes[1] + " " + quotes[2] + " " + quotes[quotes.size - 1] + " "
-                )
-                dbAccess.close()
-            }
-        })
+        val context = this
 
         //przycisk ADD
         val addButton: Button = findViewById(R.id.addButton) as Button
@@ -70,7 +54,7 @@ class ProjectCreationActivity : AppCompatActivity() {
                 } else if (name == "") {
                     Snackbar.make(view, "Name cannot be empty!", Snackbar.LENGTH_LONG).setAction("Action", null).show()
                 } else {
-                    val downloadData = DownloadData(view)
+                    val downloadData = DownloadData(view, context, id.toInt(), name)
                     downloadData.execute("http://fcds.cs.put.poznan.pl/MyWeb/BL/" + id + ".xml")
                 }
             }
@@ -90,7 +74,7 @@ class ProjectCreationActivity : AppCompatActivity() {
     }
 
     companion object {
-        private class DownloadData (val view: View) : AsyncTask<String, Void, String>() {
+        private class DownloadData (val view: View, val context: Context, val id: Int, val name: String) : AsyncTask<String, Void, String>() {
             private val TAG = "DownloadData"
             override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
@@ -98,7 +82,19 @@ class ProjectCreationActivity : AppCompatActivity() {
                     Snackbar.make(view, "Cannot find set with given ID!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
                 }
-                else Log.wtf(TAG, "onPostExecute is $result")
+                else {//Log.wtf(TAG, "onPostExecute is $result")
+                    val dbAccess: DBAccess? = DBAccess.getInstance(context)
+                    dbAccess!!.open()
+                    var projectID = dbAccess.addProject(id, name)
+                    if (projectID == -1L) {
+                        Snackbar.make(view, "This set already exists in your project list!", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show()
+                    } else {
+                        dbAccess.addComponents(projectID, result)
+                    }
+
+                    dbAccess.close()
+                }
             }
 
             override fun doInBackground(vararg url: String?): String {

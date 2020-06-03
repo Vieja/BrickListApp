@@ -8,14 +8,11 @@ class DBOpenHelper(context: Context) : SQLiteAssetHelper(context, DATABASE_NAME,
 
     fun getTest(): Cursor? {
         val db = this.readableDatabase
-        return db.rawQuery("SELECT * FROM $TABLE_CODES where id = 1", null)
+        return db.rawQuery("SELECT * FROM CODES where id = 1", null)
     }
 
     companion object {
         const val DATABASE_VERSION = 1
         const val DATABASE_NAME = "BrickList.db"
-        val TABLE_CODES = "CODES"
-        val COLUMN_ID = "id"
-        val COLUMN_ITEM_ID = "ItemID"
     }
 }

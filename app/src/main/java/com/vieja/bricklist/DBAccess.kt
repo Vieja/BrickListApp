@@ -1,8 +1,10 @@
 package com.vieja.bricklist
 
+import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.util.Log
 import java.util.*
 
 
@@ -44,6 +46,20 @@ class DBAccess private constructor(context: Context) {
             cursor.close()
             return list
         }
+
+    fun addProject(id:Int, name:String ): Long {
+        var LastAccessed = System.currentTimeMillis()
+        val cv = ContentValues()
+        cv.put("id",id)
+        cv.put("Name",name)
+        cv.put("LastAccessed",LastAccessed)
+        val newRowId = database!!.insert("INVENTORIES",null,cv)
+        return newRowId
+    }
+
+    fun addComponents(projectID: Long, result: String?) {
+
+    }
 
     companion object {
         private var instance: DBAccess? = null
