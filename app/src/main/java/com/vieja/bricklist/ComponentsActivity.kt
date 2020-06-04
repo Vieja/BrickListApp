@@ -1,8 +1,8 @@
 package com.vieja.bricklist
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -41,9 +41,10 @@ class ComponentsActivity : AppCompatActivity() {
         val recyclerView = findViewById(R.id.componentsList) as RecyclerView
         recyclerView.setHasFixedSize(true)
 
+
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
-        componentsCardsList = dbAccess.getComponentsOfProject()
+        componentsCardsList = dbAccess.getComponentsOfProject(intent.getIntExtra("ProjectID",0))
 
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@ComponentsActivity)

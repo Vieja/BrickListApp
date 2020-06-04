@@ -20,7 +20,9 @@ class ProjectListAdapter(private val context: Context, private val projectsList:
         holder.bind(projectsList[position])
 
         holder.name.setOnClickListener { view ->
-            context.startActivity(Intent(context,ComponentsActivity::class.java))
+            val intent = Intent(context,ComponentsActivity::class.java)
+            intent.putExtra("ProjectID",holder.id)
+            context.startActivity(intent)
         }
     }
 

@@ -42,12 +42,6 @@ class MainActivity : AppCompatActivity() {
         dbAccess!!.open()
         projectCardsList = dbAccess.getActiveProjects()
 
-//        projectCardsList = listOf(
-//            "test1",
-//            "test2",
-//            "test3"
-//        )
-
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = ProjectListAdapter(this@MainActivity, projectCardsList)

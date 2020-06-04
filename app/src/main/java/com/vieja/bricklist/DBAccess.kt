@@ -9,7 +9,6 @@ import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.InputSource
 import java.io.StringReader
-import java.util.*
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
 import kotlin.collections.ArrayList
@@ -76,15 +75,25 @@ class DBAccess private constructor(context: Context) {
             val colorCode = node.getElementsByTagName("COLOR").item(0).textContent
             val colorID = findColorID(colorCode)
 
+            val Code = node.getElementsByTagName("ITEMID").item(0).textContent
+            val itemID = findItemID(Code)
+
             val cv = ContentValues()
             cv.put("InventoryID", projectID)
             cv.put("TypeID", typeID)
-            cv.put("ItemID", node.getElementsByTagName("ITEMID").item(0).textContent)
-            cv.put("ColorID", colorID)
+            cv.put("ItemID", itemID)
+            cv.put("ColorID", colorID+" ["+Code+"]")
             cv.put("QuantityInSet", node.getElementsByTagName("QTY").item(0).textContent)
             cv.put("Extra", node.getElementsByTagName("EXTRA").item(0).textContent)
             database!!.insert("InventoriesParts",null,cv)
         }
+    }
+
+    private fun findItemID(Code: String?): String {
+        var cur =  database!!.rawQuery("SELECT id FROM Parts WHERE Code = \""+Code+"\"",null)
+        cur.moveToFirst()
+        if (cur.isAfterLast) return " [brak klocka w bazie]"
+        else return cur.getString(0)
     }
 
     private fun findColorID(colorCode: String?): String {
@@ -122,7 +131,7 @@ class DBAccess private constructor(context: Context) {
         val cursor = database!!.rawQuery("SELECT Name, id FROM Inventories WHERE Active = 1", null)
         cursor.moveToFirst()
         while (!cursor.isAfterLast) {
-            val pr = Project(cursor.getString(0),cursor.getString(1).toInt())
+            val pr = Project(cursor.getString(0),cursor.getInt(1))
             list.add(pr)
             cursor.moveToNext()
         }
@@ -130,9 +139,22 @@ class DBAccess private constructor(context: Context) {
         return list
     }
 
-    fun getComponentsOfProject(): List<Component> {
+    fun getComponentsOfProject(id: Int): List<Component> {
         val list = ArrayList<Component>()
-        list.add(Component(1,"Testowy","kolorek","0 of 3"))
+        val cursor = database!!.rawQuery("SELECT i.id, coalesce(p.NamePL, p.Name), coalesce(c.NamePL, c.Name), i.QuantityInStore, i.QuantityInSet\n" +
+                                                "FROM InventoriesParts i, Colors c, Parts p\n" +
+                                                "where i.ColorID = c.id AND\n" +
+                                                " i.ItemID = p.id AND\n" +
+                                                " i.InventoryID = "+id, null)
+        cursor.moveToFirst()
+        Log.v("ehhh",id.toString())
+        while (!cursor.isAfterLast) {
+            val quantity = cursor.getString(3) + " of " + cursor.getString(4)
+            val pr = Component(cursor.getInt(0),cursor.getString(1),cursor.getString(2), quantity)
+            list.add(pr)
+            cursor.moveToNext()
+        }
+        cursor.close()
         return list
     }
 
