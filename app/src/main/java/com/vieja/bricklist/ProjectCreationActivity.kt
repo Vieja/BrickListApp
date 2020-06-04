@@ -2,12 +2,15 @@ package com.vieja.bricklist
 
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
@@ -91,12 +94,32 @@ class ProjectCreationActivity : AppCompatActivity() {
                         Snackbar.make(view, "This set already exists in your project list!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show()
                     } else {
-                        dbAccess.addComponents(projectID, result)
+                        var notAdded = dbAccess.addComponents(projectID, result)
                         dbAccess.close()
-                        val ac : Activity = context as Activity
-                        ac.finish()
+                        if (notAdded.isNotEmpty()) {
+                            var i=0
+                            while(i<notAdded.size) {
+                                val builder = AlertDialog.Builder(context)
+                                builder.setTitle("Androidly Alert")
+                                builder.setMessage("Cannot add unknown parts, ItemID: "+notAdded.get(i)+", ColorID: "+notAdded.get(i+1))
+                                if(i+2 == notAdded.size) {
+                                    builder.setPositiveButton(android.R.string.yes) { dialog, which -> endActivity(context) }
+                                } else {
+                                    builder.setPositiveButton(android.R.string.yes) { dialog, which -> }
+                                }
+                                val dialog: AlertDialog = builder.create()
+                                dialog.show()
+                                i+=2
+                            }
+                        }
+
                     }
                 }
+            }
+
+            private fun endActivity(context: Context) {
+                val ac : Activity = context as Activity
+                ac.finish()
             }
 
             override fun doInBackground(vararg url: String?): String {

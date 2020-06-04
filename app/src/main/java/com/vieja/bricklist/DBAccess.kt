@@ -44,10 +44,11 @@ class DBAccess private constructor(context: Context) {
         return newRowId
     }
 
-    fun addComponents(projectID: Long, result: String) {
+    fun addComponents(projectID: Long, result: String): MutableList<String> {
         val doc = convertStringToXMLDocument(result)
         val nodesList = doc!!.getElementsByTagName("ITEM")
-        Log.v("ehhh","Liczba itemów: "+nodesList.length)
+        val partsNotInDB: MutableList<String> =
+            ArrayList()
         for (i in 0 until nodesList.length) {
             val node : Element = nodesList.item(i) as Element
             val itemType = node.getElementsByTagName("ITEMTYPE").item(0).textContent
@@ -69,16 +70,20 @@ class DBAccess private constructor(context: Context) {
             Log.v("ehh","projectID: "+projectID)
             Log.v("ehh","ItemID: "+cv.getAsString("ItemID"))
             Log.v("ehh",Code)
-//            Log.v("ehh",cv.getAsString("ColorID"))
-//            Log.v("ehh",cv.getAsString("-----------------------"))
-            database!!.insert("InventoriesParts",null,cv)
+            if (itemID != -1) {
+                database!!.insert("InventoriesParts", null, cv)
+            } else {
+                partsNotInDB.add(Code)
+                partsNotInDB.add(colorCode)
+            }
         }
+        return partsNotInDB
     }
 
     private fun findItemID(Code: String?): Int {
         var cur =  database!!.rawQuery("SELECT id FROM Parts WHERE Code = \""+Code+"\"",null)
         cur.moveToFirst()
-        if (cur.isAfterLast) return 1//Code+" [brak klocka w bazie]"
+        if (cur.isAfterLast) return -1
         else return cur.getInt(0)
     }
 
