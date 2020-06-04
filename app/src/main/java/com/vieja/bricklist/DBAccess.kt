@@ -34,29 +34,10 @@ class DBAccess private constructor(context: Context) {
         }
     }
 
-    /**
-     * Read all quotes from the database.
-     *
-     * @return a List of quotes
-     */
-    val quotes: List<String>
-        get() {
-            val list: MutableList<String> =
-                ArrayList()
-            val cursor = database!!.rawQuery("SELECT * FROM Codes", null)
-            cursor.moveToFirst()
-            while (!cursor.isAfterLast) {
-                list.add(cursor.getString(0))
-                cursor.moveToNext()
-            }
-            cursor.close()
-            return list
-        }
-
     fun addProject(id:Int, name:String ): Long {
         var LastAccessed = System.currentTimeMillis()
         val cv = ContentValues()
-        cv.put("id",id)
+        //cv.put("id",id)
         cv.put("Name",name)
         cv.put("LastAccessed",LastAccessed)
         val newRowId = database!!.insert("INVENTORIES",null,cv)
@@ -66,9 +47,9 @@ class DBAccess private constructor(context: Context) {
     fun addComponents(projectID: Long, result: String) {
         val doc = convertStringToXMLDocument(result)
         val nodesList = doc!!.getElementsByTagName("ITEM")
+        Log.v("ehhh","Liczba itemów: "+nodesList.length)
         for (i in 0 until nodesList.length) {
             val node : Element = nodesList.item(i) as Element
-
             val itemType = node.getElementsByTagName("ITEMTYPE").item(0).textContent
             val typeID = findTypeID(itemType)
 
@@ -82,30 +63,35 @@ class DBAccess private constructor(context: Context) {
             cv.put("InventoryID", projectID)
             cv.put("TypeID", typeID)
             cv.put("ItemID", itemID)
-            cv.put("ColorID", colorID+" ["+Code+"]")
+            cv.put("ColorID", colorID)
             cv.put("QuantityInSet", node.getElementsByTagName("QTY").item(0).textContent)
             cv.put("Extra", node.getElementsByTagName("EXTRA").item(0).textContent)
+            Log.v("ehh","projectID: "+projectID)
+            Log.v("ehh","ItemID: "+cv.getAsString("ItemID"))
+            Log.v("ehh",Code)
+//            Log.v("ehh",cv.getAsString("ColorID"))
+//            Log.v("ehh",cv.getAsString("-----------------------"))
             database!!.insert("InventoriesParts",null,cv)
         }
     }
 
-    private fun findItemID(Code: String?): String {
+    private fun findItemID(Code: String?): Int {
         var cur =  database!!.rawQuery("SELECT id FROM Parts WHERE Code = \""+Code+"\"",null)
         cur.moveToFirst()
-        if (cur.isAfterLast) return " [brak klocka w bazie]"
-        else return cur.getString(0)
+        if (cur.isAfterLast) return 1//Code+" [brak klocka w bazie]"
+        else return cur.getInt(0)
     }
 
-    private fun findColorID(colorCode: String?): String {
+    private fun findColorID(colorCode: String?): Int {
         var cur =  database!!.rawQuery("SELECT id FROM Colors WHERE Code = \""+colorCode+"\"",null)
         cur.moveToFirst()
-        return cur.getString(0)
+        return cur.getInt(0)
     }
 
-    private fun findTypeID(itemType: String?): String {
+    private fun findTypeID(itemType: String?): Int {
         var cur =  database!!.rawQuery("SELECT id FROM ItemTypes WHERE CODE = \""+itemType+"\"",null)
         cur.moveToFirst()
-        return cur.getString(0)
+        return cur.getInt(0)
     }
 
     private fun convertStringToXMLDocument(xmlString: String): Document? {
@@ -147,8 +133,9 @@ class DBAccess private constructor(context: Context) {
                                                 " i.ItemID = p.id AND\n" +
                                                 " i.InventoryID = "+id, null)
         cursor.moveToFirst()
-        Log.v("ehhh",id.toString())
+        Log.v("ehhh IDProject:",id.toString())
         while (!cursor.isAfterLast) {
+            Log.v("ehhh","jestem")
             val quantity = cursor.getString(3) + " of " + cursor.getString(4)
             val pr = Component(cursor.getInt(0),cursor.getString(1),cursor.getString(2), quantity)
             list.add(pr)
