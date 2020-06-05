@@ -4,14 +4,19 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.database.sqlite.SQLiteStatement
+import android.os.AsyncTask
 import android.util.Log
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.xml.sax.InputSource
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.io.StringReader
+import java.net.URL
+import java.net.URLConnection
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
-import kotlin.collections.ArrayList
 
 
 class DBAccess private constructor(context: Context) {
@@ -67,9 +72,6 @@ class DBAccess private constructor(context: Context) {
             cv.put("ColorID", colorID)
             cv.put("QuantityInSet", node.getElementsByTagName("QTY").item(0).textContent)
             cv.put("Extra", node.getElementsByTagName("EXTRA").item(0).textContent)
-            Log.v("ehh","projectID: "+projectID)
-            Log.v("ehh","ItemID: "+cv.getAsString("ItemID"))
-            Log.v("ehh",Code)
             if (itemID != -1) {
                 database!!.insert("InventoriesParts", null, cv)
             } else {
@@ -132,17 +134,16 @@ class DBAccess private constructor(context: Context) {
 
     fun getComponentsOfProject(id: Int): List<Component> {
         val list = ArrayList<Component>()
-        val cursor = database!!.rawQuery("SELECT i.id, coalesce(p.NamePL, p.Name), coalesce(c.NamePL, c.Name), i.QuantityInStore, i.QuantityInSet\n" +
+        val cursor = database!!.rawQuery("SELECT i.id, coalesce(p.NamePL, p.Name), coalesce(c.NamePL, c.Name), i.QuantityInStore, i.QuantityInSet, p.id, i.ColorID\n" +
                                                 "FROM InventoriesParts i, Colors c, Parts p\n" +
                                                 "where i.ColorID = c.id AND\n" +
                                                 " i.ItemID = p.id AND\n" +
                                                 " i.InventoryID = "+id, null)
         cursor.moveToFirst()
-        Log.v("ehhh IDProject:",id.toString())
         while (!cursor.isAfterLast) {
-            Log.v("ehhh","jestem")
+            var byteArray = getImage(cursor.getString(5),cursor.getString(6))
             val quantity = cursor.getString(3) + " of " + cursor.getString(4)
-            val pr = Component(cursor.getInt(0),cursor.getString(1),cursor.getString(2), quantity)
+            val pr = Component(cursor.getInt(0),cursor.getString(1),cursor.getString(2), quantity, byteArray)
             list.add(pr)
             cursor.moveToNext()
         }
@@ -150,7 +151,57 @@ class DBAccess private constructor(context: Context) {
         return list
     }
 
+    private fun getImage(itemID: String, colorID: String): ByteArray? {
+        val cursor = database!!.rawQuery("SELECT Image, Code, id from Codes where ItemID="+itemID+" and ColorID="+colorID,null)
+        Log.v("ehhh","SELECT Image, Code, id from Codes where ItemID="+itemID+" and ColorID="+colorID)
+        cursor.moveToFirst()
+        if (cursor.isAfterLast) {
+            Log.v("ehhhh","I'm here")
+            //Klocek jest stary, nie ma DesignID
+
+            val cursor2 = database!!.rawQuery("SELECT Code from Parts where id = "+itemID,null)
+            cursor2.moveToFirst()
+            var name = cursor2.getString(0)
+
+            val cursor4 = database!!.rawQuery("SELECT Code from Colors where id = "+colorID,null)
+            cursor4.moveToFirst()
+            var color = cursor4.getInt(0)
+
+            val cv = ContentValues()
+            cv.put("ItemID", itemID)
+            cv.put("ColorID", colorID)
+            val id_nowego = database!!.insert("Codes", null, cv)
+
+            val downloadIMG = DownloadImg(this, id_nowego.toInt())
+            downloadIMG.execute("http://img.bricklink.com/P/"+color+"/"+name+".gif")
+            Log.v("ehhh","http://img.bricklink.com/P/"+color+"/"+name+".gif")
+
+//            val cursor5 = database!!.rawQuery("SELECT Image from Codes where id="+id_nowego,null)
+//            cursor5.moveToFirst()
+//            if (!cursor5.isAfterLast) return cursor5.getBlob(0)
+
+            cursor2.close()
+            cursor4.close()
+//            cursor5.close()
+
+        } else {
+            val img = cursor.getBlob(0)
+            if (img == null) {
+                val downloadIMG = DownloadImg(this, cursor.getInt(2))
+                downloadIMG.execute("https://www.lego.com/service/bricks/5/2/"+cursor.getInt(1))
+                cursor.close()
+
+                val cursor3 = database!!.rawQuery("SELECT Image from Codes where ItemID="+itemID+" and ColorID="+colorID,null)
+                cursor3.moveToFirst()
+                if (!cursor3.isAfterLast) return cursor3.getBlob(0)
+            }
+            return img
+        }
+        return null
+    }
+
     companion object {
+
         private var instance: DBAccess? = null
 
         /**
@@ -164,6 +215,53 @@ class DBAccess private constructor(context: Context) {
                 instance = DBAccess(context)
             }
             return instance
+        }
+
+        private class DownloadImg(val dbAccess: DBAccess, val id : Int) : AsyncTask<String, Void, String>() {
+            private val TAG = "DownloadImg"
+            override fun onPostExecute(result: String?) {
+                super.onPostExecute(result)
+                Log.v("ehhhh",result)
+
+            }
+            override fun doInBackground(vararg url: String?): String {
+                val byteArray = getLogoImage(url[0])
+                if (byteArray != null) {
+                    val dbAccess = dbAccess
+                    dbAccess.open()
+                    val sql =
+                        "UPDATE Codes SET Image = ? WHERE id = " + id
+                    val insertStmt: SQLiteStatement = dbAccess.database!!.compileStatement(sql)
+                    insertStmt.clearBindings()
+                    insertStmt.bindBlob(1, byteArray)
+                    var res = insertStmt.executeUpdateDelete()
+                    return res.toString()
+                }
+                return "doInBackground: byte Array is null"
+            }
+
+            private fun getLogoImage(url: String?): ByteArray? {
+                try {
+                    val imageUrl = URL(url)
+                    val ucon: URLConnection = imageUrl.openConnection()
+
+                    val `is`: InputStream = ucon.getInputStream()
+
+                    val baos = ByteArrayOutputStream()
+                    val buffer = ByteArray(1024)
+                    var read = 0
+
+                    while (`is`.read(buffer, 0, buffer.size).also({ read = it }) != -1) {
+                        baos.write(buffer, 0, read)
+                    }
+
+                    baos.flush()
+                    return baos.toByteArray()
+                } catch (e: java.lang.Exception) {
+                    Log.d("ImageManager", "Error: $e")
+                }
+                return null
+            }
         }
     }
 

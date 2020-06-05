@@ -90,18 +90,16 @@ class ProjectCreationActivity : AppCompatActivity() {
                     dbAccess!!.open()
                     val projectID = dbAccess.addProject(id, name)
                     if (projectID == -1L) {
-                        dbAccess.close()
                         Snackbar.make(view, "This set already exists in your project list!", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show()
                     } else {
                         var notAdded = dbAccess.addComponents(projectID, result)
-                        dbAccess.close()
                         if (notAdded.isNotEmpty()) {
                             var i=0
                             while(i<notAdded.size) {
                                 val builder = AlertDialog.Builder(context)
-                                builder.setTitle("Androidly Alert")
-                                builder.setMessage("Cannot add unknown parts, ItemID: "+notAdded.get(i)+", ColorID: "+notAdded.get(i+1))
+                                builder.setTitle("Unknown parts")
+                                builder.setMessage("Cannot add unknown parts to component list\nItemID: "+notAdded.get(i)+", ColorID: "+notAdded.get(i+1))
                                 if(i+2 == notAdded.size) {
                                     builder.setPositiveButton(android.R.string.yes) { dialog, which -> endActivity(context) }
                                 } else {
