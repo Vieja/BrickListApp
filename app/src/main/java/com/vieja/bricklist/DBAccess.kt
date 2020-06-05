@@ -225,6 +225,25 @@ class DBAccess private constructor(context: Context) {
         return ""+inStore+" of "+inSet
     }
 
+    fun deactivateProject(id: Int): Int {
+        val cursor = database!!.rawQuery("SELECT Active from Inventories where id="+id,null)
+        cursor.moveToFirst()
+        val active = cursor.getInt(0)
+        var sql = ""
+        if (active == 1) sql = "UPDATE Inventories SET Active = 0 WHERE id = " + id
+        else sql = "UPDATE Inventories SET Active = 1 WHERE id = " + id
+        val insertStmt: SQLiteStatement = database!!.compileStatement(sql)
+        insertStmt.clearBindings()
+        insertStmt.executeUpdateDelete()
+        return active
+    }
+
+    fun checkIfActive(id: Int): Int {
+        val cursor = database!!.rawQuery("SELECT Active from Inventories where id="+id,null)
+        cursor.moveToFirst()
+        return cursor.getInt(0)
+    }
+
     companion object {
 
         private var instance: DBAccess? = null

@@ -2,13 +2,16 @@ package com.vieja.bricklist
 
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import java.util.ArrayList
+import java.util.*
+
 
 class ComponentsActivity : AppCompatActivity() {
 
@@ -50,6 +53,48 @@ class ComponentsActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(this@ComponentsActivity)
             adapter = ComponentListAdapter(this@ComponentsActivity, componentsCardsList)
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_options, menu)
+        var active = checkIfActive()
+        if (active == 0) menu!!.findItem(R.id.menuIsActive).setTitle("Activate project")
+        else menu!!.findItem(R.id.menuIsActive).setTitle("Deactivate project")
+        return true
+    }
+
+    private fun checkIfActive(): Int {
+        val dbAccess: DBAccess? = DBAccess.getInstance(this)
+        dbAccess!!.open()
+        return dbAccess.checkIfActive(intent.getIntExtra("ProjectID",0))
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.getItemId()) {
+            R.id.menuIsActive -> {
+                var previous = deactivateProject()
+                if (previous == 0) item.title = "Deactivate project"
+                else item.title = "Activate project"
+                true
+            }
+            R.id.menuExport -> {
+                exportToXML()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun exportToXML() {
+        Log.v("ehhh","export")
+    }
+
+    private fun deactivateProject(): Int {
+        Log.v("ehhh","deactivate")
+        val dbAccess: DBAccess? = DBAccess.getInstance(this)
+        dbAccess!!.open()
+        return dbAccess.deactivateProject(intent.getIntExtra("ProjectID",0))
     }
 
 
