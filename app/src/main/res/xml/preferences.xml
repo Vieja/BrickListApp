@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory android:title="Projects"
+        app:iconSpaceReserved="false">
+
+        <EditTextPreference
+            android:defaultValue="http://fcds.cs.put.poznan.pl/MyWeb/BL/"
+            android:key="edit_text_preference_1"
+            android:selectAllOnFocus="true"
+            app:useSimpleSummaryProvider="true"
+            android:title="Prefix of URL" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="hide_optional"
+            android:title="Archive"
+            android:summary="Show archived"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
