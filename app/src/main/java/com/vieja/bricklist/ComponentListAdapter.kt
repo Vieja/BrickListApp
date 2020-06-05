@@ -1,7 +1,6 @@
 package com.vieja.bricklist
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
@@ -21,8 +20,19 @@ class ComponentListAdapter(private val context: Context, private val componentsL
     override fun onBindViewHolder(holder: MainHolder, position: Int) {
         holder.bind(componentsList[position])
 
-        holder.name.setOnClickListener { view ->
-            context.startActivity(Intent(context,SettingsActivity::class.java))
+        holder.plus.setOnClickListener { view ->
+            //context.startActivity(Intent(context,SettingsActivity::class.java))
+            val dbAccess: DBAccess? = DBAccess.getInstance(context)
+            dbAccess!!.open()
+            val result = dbAccess.updateQuantity(true, holder.id)
+            holder.count.text = result
+        }
+
+        holder.minus.setOnClickListener { view ->
+            val dbAccess: DBAccess? = DBAccess.getInstance(context)
+            dbAccess!!.open()
+            val result = dbAccess.updateQuantity(false, holder.id)
+            holder.count.text = result
         }
     }
 
@@ -31,6 +41,8 @@ class ComponentListAdapter(private val context: Context, private val componentsL
         val color = itemView.findViewById<TextView>(R.id.partColor)
         val count = itemView.findViewById<TextView>(R.id.partCount)
         var image = itemView.findViewById<ImageView>(R.id.partImage)
+        var plus = itemView.findViewById<TextView>(R.id.addItem)
+        var minus = itemView.findViewById<TextView>(R.id.subItem)
         var id : Int = 0
 
         fun bind(pr: Component) {

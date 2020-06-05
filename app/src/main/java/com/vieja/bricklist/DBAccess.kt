@@ -200,6 +200,31 @@ class DBAccess private constructor(context: Context) {
         return null
     }
 
+    fun updateQuantity(add: Boolean, id: Int): String {
+        val cursor = database!!.rawQuery("SELECT QuantityInSet, QuantityInStore from InventoriesParts where id="+id,null)
+        cursor.moveToFirst()
+        val inSet = cursor.getInt(0)
+        var inStore = cursor.getInt(1)
+        if (add) {
+            if (inStore < inSet) {
+                inStore+=1
+                val sql = "UPDATE InventoriesParts SET QuantityInStore = "+inStore+" WHERE id = " + id
+                val insertStmt: SQLiteStatement = database!!.compileStatement(sql)
+                insertStmt.clearBindings()
+                insertStmt.executeUpdateDelete()
+            }
+        } else {
+            if (inStore > 0) {
+                inStore-=1
+                val sql = "UPDATE InventoriesParts SET QuantityInStore = "+inStore+" WHERE id = " + id
+                val insertStmt: SQLiteStatement = database!!.compileStatement(sql)
+                insertStmt.clearBindings()
+                insertStmt.executeUpdateDelete()
+            }
+        }
+        return ""+inStore+" of "+inSet
+    }
+
     companion object {
 
         private var instance: DBAccess? = null
