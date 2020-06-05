@@ -6,13 +6,13 @@
 
         <EditTextPreference
             android:defaultValue="http://fcds.cs.put.poznan.pl/MyWeb/BL/"
-            android:key="edit_text_preference_1"
+            android:key="prefixURL"
             android:selectAllOnFocus="true"
             app:useSimpleSummaryProvider="true"
             android:title="Prefix of URL" />
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="hide_optional"
+            android:key="archive"
             android:title="Archive"
             android:summary="Show archived"/>
 

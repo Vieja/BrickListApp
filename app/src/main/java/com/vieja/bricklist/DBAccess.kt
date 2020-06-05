@@ -132,6 +132,19 @@ class DBAccess private constructor(context: Context) {
         return list
     }
 
+    fun getAllProjects(): ArrayList<Project> {
+        val list = ArrayList<Project>()
+        val cursor = database!!.rawQuery("SELECT Name, id FROM Inventories", null)
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast) {
+            val pr = Project(cursor.getString(0),cursor.getInt(1))
+            list.add(pr)
+            cursor.moveToNext()
+        }
+        cursor.close()
+        return list
+    }
+
     fun getComponentsOfProject(id: Int): List<Component> {
         val list = ArrayList<Component>()
         val cursor = database!!.rawQuery("SELECT i.id, coalesce(p.NamePL, p.Name), coalesce(c.NamePL, c.Name), i.QuantityInStore, i.QuantityInSet, p.id, i.ColorID\n" +

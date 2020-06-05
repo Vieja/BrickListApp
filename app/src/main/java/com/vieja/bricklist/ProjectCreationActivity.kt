@@ -3,6 +3,7 @@ package com.vieja.bricklist
 import android.app.Activity
 import android.content.Context
 import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +15,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
+import androidx.preference.PreferenceManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_newproject.*
 import java.net.HttpURLConnection
@@ -22,9 +24,12 @@ import java.net.URL
 
 class ProjectCreationActivity : AppCompatActivity() {
 
+    private var prefs: SharedPreferences? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_newproject)
+        prefs = PreferenceManager.getDefaultSharedPreferences(this@ProjectCreationActivity)
 
         //ustawienie własnego toolbara
         val toolbar: Toolbar = findViewById(R.id.toolbar) as Toolbar
@@ -58,7 +63,7 @@ class ProjectCreationActivity : AppCompatActivity() {
                     Snackbar.make(view, "Name cannot be empty!", Snackbar.LENGTH_LONG).setAction("Action", null).show()
                 } else {
                     val downloadData = DownloadData(view, context, id.toInt(), name)
-                    downloadData.execute("http://fcds.cs.put.poznan.pl/MyWeb/BL/" + id + ".xml")
+                    downloadData.execute(prefs!!.getString("prefixURL","") + id + ".xml")
                 }
             }
         })

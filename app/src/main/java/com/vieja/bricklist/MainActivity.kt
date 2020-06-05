@@ -1,13 +1,14 @@
 package com.vieja.bricklist
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.CollapsingToolbarLayout
@@ -19,11 +20,12 @@ class MainActivity : AppCompatActivity() {
 
     private var adapter: RecyclerView.Adapter<*>? = null
     private var projectCardsList: List<Project> = ArrayList<Project>()
+    private var prefs: SharedPreferences? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
+        prefs = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
         val toolbar: Toolbar = findViewById(R.id.toolbar) as Toolbar
         setSupportActionBar(toolbar)
 
@@ -42,8 +44,10 @@ class MainActivity : AppCompatActivity() {
 
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
-        projectCardsList = dbAccess.getActiveProjects()
-
+        val showArchived = prefs!!.getBoolean("archive",false)
+        if (showArchived)
+            projectCardsList = dbAccess.getAllProjects()
+        else projectCardsList = dbAccess.getActiveProjects()
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = ProjectListAdapter(this@MainActivity, projectCardsList)
