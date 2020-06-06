@@ -2,7 +2,6 @@ package com.vieja.bricklist
 
 import android.app.Activity
 import android.content.Context
-import android.content.DialogInterface
 import android.content.SharedPreferences
 import android.os.AsyncTask
 import android.os.Bundle
@@ -10,7 +9,6 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -31,16 +29,14 @@ class ProjectCreationActivity : AppCompatActivity() {
         setContentView(R.layout.activity_newproject)
         prefs = PreferenceManager.getDefaultSharedPreferences(this@ProjectCreationActivity)
 
-        //ustawienie własnego toolbara
-        val toolbar: Toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar: Toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        getSupportActionBar()?.setDisplayHomeAsUpEnabled(true)
-        getSupportActionBar()?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.navigationIcon?.mutate()?.let {
             it.setTint(ContextCompat.getColor(this, R.color.colorSecondary))
             toolbar.navigationIcon = it
         }
-        //przycisk powrotu do poprzedniego okna
         toolbar.setNavigationOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 onBackPressed()
@@ -50,20 +46,21 @@ class ProjectCreationActivity : AppCompatActivity() {
         val view = constraintLayout
         val context = this
 
-        //przycisk ADD
-        val addButton: Button = findViewById(R.id.addButton) as Button
+        val addButton: Button = findViewById<Button>(R.id.addButton)
         addButton.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View?) {
                 val id = idInputEditText.text.toString()
                 val name = nameInputEditText.text.toString()
                 hideKeyboard(this@ProjectCreationActivity)
                 if (id == "") {
-                    Snackbar.make(view, "ID cannot be empty!", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+                    Snackbar.make(view, "ID cannot be empty!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
                 } else if (name == "") {
-                    Snackbar.make(view, "Name cannot be empty!", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+                    Snackbar.make(view, "Name cannot be empty!", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show()
                 } else {
                     val downloadData = DownloadData(view, context, id.toInt(), name)
-                    downloadData.execute(prefs!!.getString("prefixURL","") + id + ".xml")
+                    downloadData.execute(prefs!!.getString("prefixURL", "") + id + ".xml")
                 }
             }
         })
@@ -72,9 +69,7 @@ class ProjectCreationActivity : AppCompatActivity() {
     fun hideKeyboard(activity: Activity) {
         val imm: InputMethodManager =
             activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
-        //Find the currently focused view, so we can grab the correct window token from it.
         var view = activity.currentFocus
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
         if (view == null) {
             view = View(activity)
         }
@@ -82,37 +77,53 @@ class ProjectCreationActivity : AppCompatActivity() {
     }
 
     companion object {
-        private class DownloadData (val view: View, val context: Context, val id: Int, val name: String) : AsyncTask<String, Void, String>() {
+        private class DownloadData(
+            val view: View,
+            val context: Context,
+            val id: Int,
+            val name: String
+        ) : AsyncTask<String, Void, String>() {
             private val TAG = "DownloadData"
             override fun onPostExecute(result: String?) {
                 super.onPostExecute(result)
                 if (result == "" || result == null) {
                     Snackbar.make(view, "Cannot find set with given ID!", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show()
-                }
-                else {//Log.wtf(TAG, "onPostExecute is $result")
+                } else {
                     val dbAccess: DBAccess? = DBAccess.getInstance(context)
                     dbAccess!!.open()
                     val projectID = dbAccess.addProject(id, name)
                     if (projectID == -1L) {
-                        Snackbar.make(view, "This set already exists in your project list!", Snackbar.LENGTH_LONG)
+                        Snackbar.make(
+                            view,
+                            "This set already exists in your project list!",
+                            Snackbar.LENGTH_LONG
+                        )
                             .setAction("Action", null).show()
                     } else {
                         var notAdded = dbAccess.addComponents(projectID, result)
                         if (notAdded.isNotEmpty()) {
-                            var i=0
-                            while(i<notAdded.size) {
+                            var i = 0
+                            while (i < notAdded.size) {
                                 val builder = AlertDialog.Builder(context)
                                 builder.setTitle("Unknown parts")
-                                builder.setMessage("Cannot add unknown parts to component list\nItemID: "+notAdded.get(i)+", ColorID: "+notAdded.get(i+1))
-                                if(i+2 == notAdded.size) {
-                                    builder.setPositiveButton(android.R.string.yes) { dialog, which -> endActivity(context) }
+                                builder.setMessage(
+                                    "Cannot add unknown parts to component list\nItemID: " + notAdded.get(
+                                        i
+                                    ) + ", ColorID: " + notAdded.get(i + 1)
+                                )
+                                if (i + 2 == notAdded.size) {
+                                    builder.setPositiveButton(android.R.string.yes) { dialog, which ->
+                                        endActivity(
+                                            context
+                                        )
+                                    }
                                 } else {
                                     builder.setPositiveButton(android.R.string.yes) { dialog, which -> }
                                 }
                                 val dialog: AlertDialog = builder.create()
                                 dialog.show()
-                                i+=2
+                                i += 2
                             }
                         }
 
@@ -121,7 +132,7 @@ class ProjectCreationActivity : AppCompatActivity() {
             }
 
             private fun endActivity(context: Context) {
-                val ac : Activity = context as Activity
+                val ac: Activity = context as Activity
                 ac.finish()
             }
 
@@ -138,7 +149,7 @@ class ProjectCreationActivity : AppCompatActivity() {
                 val url = URL(urlPath)
                 try {
                     val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
-                    val responseCode: Int = huc.getResponseCode()
+                    val responseCode: Int = huc.responseCode
                     if (responseCode.equals(HttpURLConnection.HTTP_NOT_FOUND)) return ""
                 } catch (e: Exception) {
                     return ""

@@ -2,7 +2,6 @@ package com.vieja.bricklist
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -24,10 +23,10 @@ class ComponentsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_components)
 
         //ustawienie własnego toolbara
-        val toolbar: Toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar: Toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        getSupportActionBar()?.setDisplayHomeAsUpEnabled(true)
-        getSupportActionBar()?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.navigationIcon?.mutate()?.let {
             it.setTint(ContextCompat.getColor(this, R.color.colorSecondary))
             toolbar.navigationIcon = it
@@ -42,13 +41,13 @@ class ComponentsActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val recyclerView = findViewById(R.id.componentsList) as RecyclerView
+        val recyclerView = findViewById<RecyclerView>(R.id.componentsList)
         recyclerView.setHasFixedSize(true)
 
 
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
-        componentsCardsList = dbAccess.getComponentsOfProject(intent.getIntExtra("ProjectID",0))
+        componentsCardsList = dbAccess.getComponentsOfProject(intent.getIntExtra("ProjectID", 0))
 
         recyclerView.apply {
             layoutManager = LinearLayoutManager(this@ComponentsActivity)
@@ -59,20 +58,20 @@ class ComponentsActivity : AppCompatActivity() {
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_options, menu)
         var active = checkIfActive()
-        if (active == 0) menu!!.findItem(R.id.menuIsActive).setTitle("Activate project")
-        else menu!!.findItem(R.id.menuIsActive).setTitle("Deactivate project")
+        if (active == 0) menu!!.findItem(R.id.menuIsActive).title = "Activate project"
+        else menu!!.findItem(R.id.menuIsActive).title = "Deactivate project"
         return true
     }
 
     private fun checkIfActive(): Int {
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
-        return dbAccess.checkIfActive(intent.getIntExtra("ProjectID",0))
+        return dbAccess.checkIfActive(intent.getIntExtra("ProjectID", 0))
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Handle item selection
-        return when (item.getItemId()) {
+        return when (item.itemId) {
             R.id.menuIsActive -> {
                 var previous = deactivateProject()
                 if (previous == 0) item.title = "Deactivate project"
@@ -90,7 +89,7 @@ class ComponentsActivity : AppCompatActivity() {
     private fun exportToXML() {
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
-        var xmlek = dbAccess.getXML(intent.getIntExtra("ProjectID",0))
+        var xmlek = dbAccess.getXML(intent.getIntExtra("ProjectID", 0))
         val intent = Intent(Intent.ACTION_SEND)
         intent.type = "text/plain"
         intent.putExtra(Intent.EXTRA_EMAIL, "emailaddress@emailaddress.com")
@@ -102,7 +101,7 @@ class ComponentsActivity : AppCompatActivity() {
     private fun deactivateProject(): Int {
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
-        return dbAccess.deactivateProject(intent.getIntExtra("ProjectID",0))
+        return dbAccess.deactivateProject(intent.getIntExtra("ProjectID", 0))
     }
 
 

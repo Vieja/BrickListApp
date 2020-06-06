@@ -26,25 +26,25 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         prefs = PreferenceManager.getDefaultSharedPreferences(this@MainActivity)
-        val toolbar: Toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar: Toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        var collapsingToolbar = findViewById(R.id.collapsingToolbar) as CollapsingToolbarLayout
-        collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.colorAccent));
+        var collapsingToolbar = findViewById<CollapsingToolbarLayout>(R.id.collapsingToolbar)
+        collapsingToolbar.setExpandedTitleColor(ContextCompat.getColor(this, R.color.colorAccent))
 
         addProjectButton.setOnClickListener { view ->
-            startActivity(Intent(this,ProjectCreationActivity::class.java))
+            startActivity(Intent(this, ProjectCreationActivity::class.java))
         }
     }
 
     override fun onStart() {
         super.onStart()
-        val recyclerView = findViewById(R.id.projectsList) as RecyclerView
+        val recyclerView = findViewById<RecyclerView>(R.id.projectsList)
         recyclerView.setHasFixedSize(true)
 
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
-        val showArchived = prefs!!.getBoolean("archive",false)
+        val showArchived = prefs!!.getBoolean("archive", false)
         if (showArchived)
             projectCardsList = dbAccess.getAllProjects()
         else projectCardsList = dbAccess.getActiveProjects()
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        this.startActivity(Intent(this,SettingsActivity::class.java))
+        this.startActivity(Intent(this, SettingsActivity::class.java))
         return true
     }
 }

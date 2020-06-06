@@ -9,11 +9,15 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ComponentListAdapter(private val context: Context, private val componentsList: List<Component>) : RecyclerView.Adapter<ComponentListAdapter.MainHolder>() {
+class ComponentListAdapter(
+    private val context: Context,
+    private val componentsList: List<Component>
+) : RecyclerView.Adapter<ComponentListAdapter.MainHolder>() {
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-            = MainHolder(LayoutInflater.from(parent.context).inflate(R.layout.component_card, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = MainHolder(
+        LayoutInflater.from(parent.context).inflate(R.layout.component_card, parent, false)
+    )
 
     override fun getItemCount() = componentsList.size
 
@@ -42,14 +46,20 @@ class ComponentListAdapter(private val context: Context, private val componentsL
         var image = itemView.findViewById<ImageView>(R.id.partImage)
         var plus = itemView.findViewById<TextView>(R.id.addItem)
         var minus = itemView.findViewById<TextView>(R.id.subItem)
-        var id : Int = 0
+        var id: Int = 0
 
         fun bind(pr: Component) {
             name.text = pr.name
             color.text = pr.color
             count.text = pr.count
             if (pr.byteArray != null) {
-                image.setImageBitmap(BitmapFactory.decodeByteArray(pr.byteArray, 0,pr.byteArray.size))
+                image.setImageBitmap(
+                    BitmapFactory.decodeByteArray(
+                        pr.byteArray,
+                        0,
+                        pr.byteArray.size
+                    )
+                )
             }
             id = pr.id
         }

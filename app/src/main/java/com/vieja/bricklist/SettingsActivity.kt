@@ -1,8 +1,6 @@
 package com.vieja.bricklist
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -15,10 +13,10 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_settings)
         loadFragment(SettingsFragment())
 
-        val toolbar: Toolbar = findViewById(R.id.toolbar) as Toolbar
+        val toolbar: Toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        getSupportActionBar()?.setDisplayHomeAsUpEnabled(true)
-        getSupportActionBar()?.setDisplayShowHomeEnabled(true)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
         toolbar.navigationIcon?.mutate()?.let {
             it.setTint(ContextCompat.getColor(this, R.color.colorSecondary))
             toolbar.navigationIcon = it

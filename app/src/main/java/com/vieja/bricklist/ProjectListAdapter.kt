@@ -8,11 +8,13 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class ProjectListAdapter(private val context: Context, private val projectsList: List<Project>) : RecyclerView.Adapter<ProjectListAdapter.MainHolder>() {
+class ProjectListAdapter(private val context: Context, private val projectsList: List<Project>) :
+    RecyclerView.Adapter<ProjectListAdapter.MainHolder>() {
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-            = MainHolder(LayoutInflater.from(parent.context).inflate(R.layout.project_card, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = MainHolder(
+        LayoutInflater.from(parent.context).inflate(R.layout.project_card, parent, false)
+    )
 
     override fun getItemCount() = projectsList.size
 
@@ -20,15 +22,15 @@ class ProjectListAdapter(private val context: Context, private val projectsList:
         holder.bind(projectsList[position])
 
         holder.name.setOnClickListener { view ->
-            val intent = Intent(context,ComponentsActivity::class.java)
-            intent.putExtra("ProjectID",holder.id)
+            val intent = Intent(context, ComponentsActivity::class.java)
+            intent.putExtra("ProjectID", holder.id)
             context.startActivity(intent)
         }
     }
 
     inner class MainHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val name = itemView.findViewById<TextView>(R.id.projectName)
-        var id : Int = 0
+        var id: Int = 0
 
         fun bind(pr: Project) {
             name.text = pr.name

@@ -6,6 +6,4 @@ class Component(
     val color: String,
     val count: String,
     val byteArray: ByteArray?
-) {
-
-}
+)
