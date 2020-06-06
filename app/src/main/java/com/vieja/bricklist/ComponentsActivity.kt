@@ -1,5 +1,6 @@
 package com.vieja.bricklist
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -87,11 +88,18 @@ class ComponentsActivity : AppCompatActivity() {
     }
 
     private fun exportToXML() {
-        Log.v("ehhh","export")
+        val dbAccess: DBAccess? = DBAccess.getInstance(this)
+        dbAccess!!.open()
+        var xmlek = dbAccess.getXML(intent.getIntExtra("ProjectID",0))
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_EMAIL, "emailaddress@emailaddress.com")
+        intent.putExtra(Intent.EXTRA_SUBJECT, "[BrickLink] Missing parts")
+        intent.putExtra(Intent.EXTRA_TEXT, xmlek)
+        startActivity(Intent.createChooser(intent, "Send Email"))
     }
 
     private fun deactivateProject(): Int {
-        Log.v("ehhh","deactivate")
         val dbAccess: DBAccess? = DBAccess.getInstance(this)
         dbAccess!!.open()
         return dbAccess.deactivateProject(intent.getIntExtra("ProjectID",0))

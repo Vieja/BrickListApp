@@ -7,16 +7,23 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.database.sqlite.SQLiteStatement
 import android.os.AsyncTask
 import android.util.Log
+import android.util.Xml
 import org.w3c.dom.Document
-import org.w3c.dom.Element
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.io.StringReader
+import java.io.StringWriter
 import java.net.URL
 import java.net.URLConnection
 import javax.xml.parsers.DocumentBuilder
 import javax.xml.parsers.DocumentBuilderFactory
+import javax.xml.transform.Transformer
+import javax.xml.transform.TransformerException
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
 
 
 class DBAccess private constructor(context: Context) {
@@ -255,6 +262,52 @@ class DBAccess private constructor(context: Context) {
         val cursor = database!!.rawQuery("SELECT Active from Inventories where id="+id,null)
         cursor.moveToFirst()
         return cursor.getInt(0)
+    }
+
+    fun getXML(id: Int): String {
+        val xmlSerializer = Xml.newSerializer()
+        val writer = StringWriter()
+        xmlSerializer.setOutput(writer)
+        xmlSerializer.startDocument("UTF-8", false)
+
+        val cursor = database!!.rawQuery("SELECT t.Code, p.Code, c.Code, i.QuantityInSet-i.QuantityInStore  from InventoriesParts i, ItemTypes t, Parts p, Colors c\n" +
+                "where i.TypeID = t.id and i.ItemID = p.id and i.ColorID = c.id\n" +
+                "and i.QuantityInSet-i.QuantityInStore > 0",null)
+
+        cursor.moveToFirst()
+
+        xmlSerializer.startTag("", "INVENTORY")
+        while (!cursor.isAfterLast) {
+
+            xmlSerializer.startTag("", "ITEM")
+
+            xmlSerializer.startTag("", "ITEMTYPE")
+            xmlSerializer.text(cursor.getString(0))
+            xmlSerializer.endTag("", "ITEMTYPE")
+
+            xmlSerializer.startTag("", "ITEMID")
+            xmlSerializer.text(cursor.getString(1))
+            xmlSerializer.endTag("", "ITEMID")
+
+            xmlSerializer.startTag("", "COLOR")
+            xmlSerializer.text(cursor.getInt(2).toString())
+            xmlSerializer.endTag("", "COLOR")
+
+            xmlSerializer.startTag("", "QTYFILLED")
+            xmlSerializer.text(cursor.getInt(3).toString())
+            xmlSerializer.endTag("", "QTYFILLED")
+
+            xmlSerializer.endTag("", "ITEM")
+
+            cursor.moveToNext()
+        }
+        xmlSerializer.endTag("", "INVENTORY")
+        xmlSerializer.endDocument()
+
+        val result = writer.toString().replace("--><", "-->\n<")
+        val res = result.substring(55).replace("<", "\n<").replace("\n</", "</")
+        return res
+
     }
 
     companion object {

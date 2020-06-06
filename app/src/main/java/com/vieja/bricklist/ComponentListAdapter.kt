@@ -21,7 +21,6 @@ class ComponentListAdapter(private val context: Context, private val componentsL
         holder.bind(componentsList[position])
 
         holder.plus.setOnClickListener { view ->
-            //context.startActivity(Intent(context,SettingsActivity::class.java))
             val dbAccess: DBAccess? = DBAccess.getInstance(context)
             dbAccess!!.open()
             val result = dbAccess.updateQuantity(true, holder.id)
